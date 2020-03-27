@@ -9,8 +9,7 @@ Enables you to add PagerDuty's advanced event and incident management functional
 
 Usage:
 ```
-var client = new PagerDutyClient("https://events.pagerduty.com", SERVICE_ROUTING_KEY);
+var client = new PagerDutyClient("https://events.pagerduty.com", SERVICE_ROUTING_KEY, new HttpClient());
 
-await client.SendEvent("My serivce", EventAction.Trigger, Severity.Error, "Something went wrong!");
-
+await client.TriggerCriticalEventAsync("My service", EventAction.Trigger, Severity.Error, "Something went wrong!");
 ```
