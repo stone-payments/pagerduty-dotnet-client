@@ -1,70 +1,58 @@
 ﻿using Newtonsoft.Json;
 using StoneCo.PagerDuty.Client.Contracts;
-using System;
-using System.Net;
+using StoneCo.PagerDuty.Client.Exception;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace StoneCo.PagerDuty.Client
 {
-    public class PagerDutyClient
+    public class PagerDutyClient : IPagerDutyClient
     {
-        private const string SEND_EVENT_ENDPOINT = "/v2/enqueue";
-        private Uri _uri;
-        private HttpClient _httpClient;
+        private const string SendEventEndpoint = "v2/enqueue";
+        private readonly HttpClient _httpClient;
 
-        public PagerDutyClient(string baseAddress, string routingKey)
+        public PagerDutyClient(string routingKey, HttpClient httpClient)
         {
-            _uri = new Uri(baseAddress);
-            _httpClient = new HttpClient();
-
+            _httpClient = httpClient;
             _httpClient.DefaultRequestHeaders.Add("x-routing-key", routingKey);
         }
 
-        public async Task<SendEventResponse> Trigger(string source, EventAction action, Severity severity, string summary)
+        private async Task Trigger(string source, string summary, EventAction action, Severity severity)
         {
-            SendEventRequest e = new SendEventRequest(source, action, severity, summary);
-
-            return await SendEvent(e);
+            await SendEvent(new SendEventRequest(source, action, severity, summary));
         }
 
-        private async Task<SendEventResponse> SendEvent(SendEventRequest e)
+        private async Task SendEvent(SendEventRequest e)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_uri, SEND_EVENT_ENDPOINT));
-            request.Content = new StringContent(JsonConvert.SerializeObject(e));
+            HttpResponseMessage response = null;
 
-            var response = await _httpClient.SendAsync(request);
+            try
+            {
+                using var request = new StringContent(JsonConvert.SerializeObject(e));
 
-            return await HandleSendEventRespose(response);
+                response = await _httpClient.PostAsync(SendEventEndpoint, request);
+
+                response.EnsureSuccessStatusCode();
+            }
+            catch (System.Exception ex)
+            {
+                throw new PagerDutyTriggerException(ex
+                    , response is null
+                        ? "No content."
+                        : $"Response {response.Content.ReadAsStringAsync()}.");
+            }
         }
 
-        private async Task<SendEventResponse> HandleSendEventRespose(HttpResponseMessage response)
-        {
-            var content = await response.Content.ReadAsStringAsync();
+        public Task TriggerCriticalEventAsync(string source, string summary) =>
+            Trigger(source, summary, EventAction.Trigger, Severity.Critical);
 
-            SendEventResponse sendResponse;
-            if (response.StatusCode == HttpStatusCode.Accepted ||
-                response.StatusCode == HttpStatusCode.BadRequest)
-            {
-                sendResponse = JsonConvert.DeserializeObject<SendEventResponse>(content);
-                sendResponse.StatusCode = (int)response.StatusCode;
-                sendResponse.Success = response.StatusCode == HttpStatusCode.Accepted;
-            }
-            else if ((int)response.StatusCode == 429)
-            {
-                sendResponse = new SendEventResponse
-                {
-                    StatusCode = 429,
-                    Success = false,
-                    Message = "Too Many Requests. Easy, tiger!",
-                };
-            }
-            else
-            {
-                throw new Exception($"Unmapped response with status code [{response.StatusCode}] received. Content: {content}");
-            }
+        public Task TriggerErrorEventAsync(string source, string summary) =>
+            Trigger(source, summary, EventAction.Trigger, Severity.Error);
 
-            return sendResponse;
-        }
+        public Task TriggerInfoEventAsync(string source, string summary) =>
+            Trigger(source, summary, EventAction.Trigger, Severity.Info);
+
+        public Task TriggerWarningEventAsync(string source, string summary) =>
+            Trigger(source, summary, EventAction.Trigger, Severity.Warning);
     }
 }

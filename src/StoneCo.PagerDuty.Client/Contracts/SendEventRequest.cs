@@ -3,7 +3,7 @@ using Newtonsoft.Json.Converters;
 
 namespace StoneCo.PagerDuty.Client.Contracts
 {
-    public class SendEventRequest
+    internal class SendEventRequest
     {
         public SendEventRequest(Payload payload, EventAction eventAction)
         {

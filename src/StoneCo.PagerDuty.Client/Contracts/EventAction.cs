@@ -2,14 +2,8 @@
 
 namespace StoneCo.PagerDuty.Client.Contracts
 {
-    public enum EventAction
+    internal enum EventAction
     {
-        [EnumMember(Value = "acknowledge")] 
-        Acknowledge,
-
-        [EnumMember(Value = "resolve")] 
-        Resolve,
-
         [EnumMember(Value = "trigger")] 
         Trigger,
     }

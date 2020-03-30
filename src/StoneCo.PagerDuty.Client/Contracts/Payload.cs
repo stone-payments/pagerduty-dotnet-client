@@ -3,7 +3,7 @@ using Newtonsoft.Json.Converters;
 
 namespace StoneCo.PagerDuty.Client.Contracts
 {
-    public class Payload
+    internal class Payload
     {
         public Payload(string source, string summary, Severity severity)
         {
