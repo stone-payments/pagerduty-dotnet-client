@@ -31,7 +31,7 @@ namespace StoneCo.PagerDuty.Client
 
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_uri, SendEventEndpoint))
+                using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_uri, SendEventEndpoint))
                 {
                     Content = new StringContent(JsonConvert.SerializeObject(e))
                 };
