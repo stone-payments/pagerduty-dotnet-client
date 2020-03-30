@@ -42,8 +42,10 @@ namespace StoneCo.PagerDuty.Client
             }
             catch (System.Exception ex)
             {
-                var content = response.Content.ReadAsStringAsync();
-                throw new PagerDutyTriggerException(ex, $"Response {content}.");
+                throw new PagerDutyTriggerException(ex
+                    , response is null
+                        ? "No content."
+                        : $"Response {response.Content.ReadAsStringAsync()}.");
             }
         }
 
