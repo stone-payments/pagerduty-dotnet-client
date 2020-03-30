@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using Microsoft.Extensions.Options;
 using StoneCo.PagerDuty.Client.IntegrationTest.Settings;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,9 +16,8 @@ namespace StoneCo.PagerDuty.Client.IntegrationTest.Test
             var options = Resolve<IOptions<PagerDutySettingsInTest>>();
 
             var pagerDutySettings = options.Value;
-
-            _pagerDutyClient = new PagerDutyClient(pagerDutySettings.BaseAddress, pagerDutySettings.RoutingKey,
-                new HttpClient());
+            
+            _pagerDutyClient = new PagerDutyClient(pagerDutySettings.RoutingKey, new HttpClient { BaseAddress = new Uri(pagerDutySettings.BaseAddress) });
         }
 
         [Fact]
