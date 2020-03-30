@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2020-03-27
 ### Changed
-- Implements new actions on PagerDutyClient Trigger[Critical,Erro,Waring,Info]
+- Implements new actions on PagerDutyClient Trigger[Critical,Erro,Warning,Info]
 
 ### Added
 
