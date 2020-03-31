@@ -1,8 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Options;
-using StoneCo.PagerDuty.Client.IntegrationTest.Settings;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Xunit;
 
 namespace StoneCo.PagerDuty.Client.IntegrationTest.Test
@@ -13,11 +9,7 @@ namespace StoneCo.PagerDuty.Client.IntegrationTest.Test
 
         public PagerDutyClientTest()
         {
-            var options = Resolve<IOptions<PagerDutySettingsInTest>>();
-
-            var pagerDutySettings = options.Value;
-            
-            _pagerDutyClient = new PagerDutyClient(pagerDutySettings.RoutingKey, new HttpClient { BaseAddress = new Uri(pagerDutySettings.BaseAddress) });
+            _pagerDutyClient = Resolve<IPagerDutyClient>(); 
         }
 
         [Fact]

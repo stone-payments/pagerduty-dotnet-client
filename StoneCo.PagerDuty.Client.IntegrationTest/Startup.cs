@@ -1,9 +1,11 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StoneCo.PagerDuty.Client.IntegrationTest.Settings;
+using StoneCo.PagerDuty.Client.Settings;
+using System;
+using System.Net.Http;
+using StoneCo.PagerDuty.Client.Extension;
 
 namespace StoneCo.PagerDuty.Client.IntegrationTest
 {
@@ -23,7 +25,9 @@ namespace StoneCo.PagerDuty.Client.IntegrationTest
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<PagerDutySettingsInTest>(_configurationRoot.GetSection("PagerDutySettingsInTest"));
+            services.Configure<PagerDutySettings>(_configurationRoot.GetSection("PagerDutySettingsTest"));
+
+            services.AddPagerDuty(hch => new HttpClientHandler());
         }
 
         public void Configure(IServiceProvider services, IApplicationBuilder app){}
