@@ -16,7 +16,7 @@ jobs:
     buildConfiguration: 'Release'
   steps:
   - script: dotnet pack --configuration $(buildConfiguration) --output "$(Build.ArtifactStagingDirectory)"
-    displayName: 'dotnet build $(buildConfiguration)'
+    displayName: 'dotnet pack --configuration $(buildConfiguration) --output "$(Build.ArtifactStagingDirectory)'
   - publish: "$(Build.ArtifactStagingDirectory)"
     artifact: drop
     displayName: 'Publish Artifact: drop'
@@ -32,6 +32,6 @@ jobs:
   - task: NuGetCommand@2
     inputs:
       command: 'push'
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+      packagesToPush: '**/*.nupkg'
       feedsToUse: 'select'
       publishVstsFeed: 'ProcessorArtifacts'
