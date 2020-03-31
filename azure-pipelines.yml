@@ -32,6 +32,6 @@ jobs:
   - task: NuGetCommand@2
     inputs:
       command: 'push'
-      packagesToPush: '**/*.nupkg'
+      packagesToPush: '$(Pipeline.Workspace)/drop/**/**.nupkg'
       feedsToUse: 'select'
       publishVstsFeed: 'ProcessorArtifacts'
