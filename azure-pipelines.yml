@@ -29,7 +29,6 @@ jobs:
   steps:
   - download: current
     artifact: drop
-    patterns: '**/**.nupkg'
   - task: NuGetCommand@2
     inputs:
       command: 'push'
