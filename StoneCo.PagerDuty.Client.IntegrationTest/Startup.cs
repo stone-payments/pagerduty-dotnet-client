@@ -25,9 +25,8 @@ namespace StoneCo.PagerDuty.Client.IntegrationTest
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<PagerDutySettings>(_configurationRoot.GetSection("PagerDutySettingsTest"));
-
-            services.AddPagerDuty(hch => new HttpClientHandler());
+            services.AddPagerDuty(pds => _configurationRoot.GetSection("PagerDutySettingsTest").Bind(pds)
+                , hch => new HttpClientHandler());
         }
 
         public void Configure(IServiceProvider services, IApplicationBuilder app){}

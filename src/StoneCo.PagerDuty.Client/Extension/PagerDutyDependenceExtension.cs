@@ -1,15 +1,17 @@
-﻿using System;
-using System.Net.Http;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StoneCo.PagerDuty.Client.Settings;
+using System;
+using System.Net.Http;
 
 namespace StoneCo.PagerDuty.Client.Extension
 {
     public static class PagerDutyDependenceExtension
     {
-        public static void AddPagerDuty(this IServiceCollection service, Func<IServiceProvider, HttpMessageHandler> configureHttpMessageHandler)
+        public static void AddPagerDuty(this IServiceCollection service, Action<PagerDutySettings> pagerDutySettingsConfiguration, Func<IServiceProvider, HttpMessageHandler> configureHttpMessageHandler)
         {
+            service.Configure(pagerDutySettingsConfiguration);
+
             service.AddSingleton<IPagerDutyClient, PagerDutyClient>();
             service.AddHttpClient<IPagerDutyClient, PagerDutyClient>(ConfigureClient)
                 .ConfigurePrimaryHttpMessageHandler(configureHttpMessageHandler);
