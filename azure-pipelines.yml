@@ -1,0 +1,38 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- "*"
+name: $(Date:yyyyMMdd)$(Rev:.r)
+jobs:
+- job: buildNugetPackage
+  displayName: "Build Package"
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    buildConfiguration: 'Release'
+  steps:
+  - script: dotnet pack --configuration $(buildConfiguration) --output "$(Build.ArtifactStagingDirectory)"
+    displayName: 'dotnet pack --configuration $(buildConfiguration) --output "$(Build.ArtifactStagingDirectory)'
+  - publish: "$(Build.ArtifactStagingDirectory)"
+    artifact: drop
+    displayName: 'Publish Artifact: drop'
+
+- job: publishNugetPackage
+  condition: eq(variables['build.sourceBranch'], 'refs/heads/master')
+  displayName: "Publish Nuget package on ProcessorArtifacts"
+  dependsOn: buildNugetPackage
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - download: current
+    artifact: drop
+  - task: NuGetCommand@2
+    inputs:
+      command: 'push'
+      displayName: 'Push package to ProcessorArtifacts feed'
+      packagesToPush: '$(Pipeline.Workspace)/drop/**/**.nupkg'
+      feedsToUse: 'select'
+      publishVstsFeed: 'ProcessorArtifacts'
