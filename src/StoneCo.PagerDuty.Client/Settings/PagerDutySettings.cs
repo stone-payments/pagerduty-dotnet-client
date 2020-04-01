@@ -1,6 +1,6 @@
-﻿namespace StoneCo.PagerDuty.Client.IntegrationTest.Settings
+﻿namespace StoneCo.PagerDuty.Client.Settings
 {
-    public class PagerDutySettingsInTest
+    public class PagerDutySettings
     {
         public string BaseAddress { get; set; }
         public string RoutingKey { get; set; }
