@@ -4,6 +4,7 @@ using StoneCo.PagerDuty.Client.Exception;
 using StoneCo.PagerDuty.Client.Extension;
 using StoneCo.PagerDuty.Client.Settings;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace StoneCo.PagerDuty.Client
@@ -18,9 +19,12 @@ namespace StoneCo.PagerDuty.Client
             _httpClient = httpClient;
         }
 
-        public PagerDutyClient(PagerDutySettings pagerDutySettings)
+        public PagerDutyClient(PagerDutySettings pagerDutySettings, HttpMessageHandler httpMessageHandler = null)
         {
-            _httpClient = new HttpClient();
+            _httpClient = httpMessageHandler is null 
+                ? new HttpClient() 
+                : new HttpClient(httpMessageHandler);
+
             PagerDutyDependenceExtension.ConfigureHttpClient(_httpClient, pagerDutySettings);
         }
 
