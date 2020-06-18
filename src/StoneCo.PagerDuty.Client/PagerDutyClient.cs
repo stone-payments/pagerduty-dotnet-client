@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 using StoneCo.PagerDuty.Client.Contracts;
 using StoneCo.PagerDuty.Client.Exception;
-using StoneCo.PagerDuty.Client.Extension;
-using StoneCo.PagerDuty.Client.Settings;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using StoneCo.PagerDuty.Client.Settings;
 
 namespace StoneCo.PagerDuty.Client
 {
@@ -13,15 +13,9 @@ namespace StoneCo.PagerDuty.Client
         private const string SendEventEndpoint = "v2/enqueue";
         private readonly HttpClient _httpClient;
 
-        public PagerDutyClient(HttpClient httpClient)
+        public PagerDutyClient(IOptionsSnapshot<PagerDutySettings> options, HttpClient httpClient)
         {
             _httpClient = httpClient;
-        }
-
-        public PagerDutyClient(PagerDutySettings pagerDutySettings)
-        {
-            _httpClient = new HttpClient();
-            PagerDutyDependenceExtension.ConfigureHttpClient(_httpClient, pagerDutySettings);
         }
 
         private async Task Trigger(string source, string summary, EventAction action, Severity severity)
