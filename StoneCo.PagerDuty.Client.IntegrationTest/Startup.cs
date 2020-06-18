@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StoneCo.PagerDuty.Client.Settings;
+using StoneCo.PagerDuty.Client.Extension;
 using System;
 using System.Net.Http;
-using StoneCo.PagerDuty.Client.Extension;
+using StoneCo.PagerDuty.Client.Settings;
 
 namespace StoneCo.PagerDuty.Client.IntegrationTest
 {
@@ -25,6 +25,11 @@ namespace StoneCo.PagerDuty.Client.IntegrationTest
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var pagerDutySettings = new PagerDutySettings();
+            _configurationRoot.GetSection("PagerDutySettingsTest").Bind(pagerDutySettings);
+
+            services.AddSingleton(pagerDutySettings);
+
             services.AddPagerDuty(pds => _configurationRoot.GetSection("PagerDutySettingsTest").Bind(pds)
                 , hch => new HttpClientHandler());
         }

@@ -11,7 +11,7 @@ namespace StoneCo.PagerDuty.Client.Extension
         public static void AddPagerDuty(this IServiceCollection service, Action<PagerDutySettings> pagerDutySettingsConfiguration, Func<IServiceProvider, HttpMessageHandler> configureHttpMessageHandler)
         {
             service.Configure(pagerDutySettingsConfiguration);
-
+            
             service.AddSingleton<IPagerDutyClient, PagerDutyClient>();
             service.AddHttpClient<IPagerDutyClient, PagerDutyClient>(ConfigureClient)
                 .ConfigurePrimaryHttpMessageHandler(configureHttpMessageHandler);
@@ -21,6 +21,11 @@ namespace StoneCo.PagerDuty.Client.Extension
         {
             var pagerDutySettings = serviceProvider.GetRequiredService<IOptionsSnapshot<PagerDutySettings>>().Value;
 
+            ConfigureHttpClient(httpClient, pagerDutySettings);
+        }
+
+        public static void ConfigureHttpClient(HttpClient httpClient, PagerDutySettings pagerDutySettings)
+        {
             httpClient.BaseAddress = new Uri(pagerDutySettings.BaseAddress);
             httpClient.DefaultRequestHeaders.Add("x-routing-key", pagerDutySettings.RoutingKey);
         }
