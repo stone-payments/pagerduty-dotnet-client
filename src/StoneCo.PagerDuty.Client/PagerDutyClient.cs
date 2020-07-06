@@ -4,7 +4,6 @@ using StoneCo.PagerDuty.Client.Exception;
 using StoneCo.PagerDuty.Client.Extension;
 using StoneCo.PagerDuty.Client.Settings;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace StoneCo.PagerDuty.Client
@@ -28,9 +27,9 @@ namespace StoneCo.PagerDuty.Client
             PagerDutyDependenceExtension.ConfigureHttpClient(_httpClient, pagerDutySettings);
         }
 
-        private async Task Trigger(string source, string summary, EventAction action, Severity severity)
+        private async Task Trigger(string source, string summary, EventAction action, Severity severity, string dedupKey)
         {
-            await SendEvent(new SendEventRequest(source, action, severity, summary));
+            await SendEvent(new SendEventRequest(source, action, severity, summary, dedupKey));
         }
 
         private async Task SendEvent(SendEventRequest e)
@@ -54,16 +53,16 @@ namespace StoneCo.PagerDuty.Client
             }
         }
 
-        public Task TriggerCriticalEventAsync(string source, string summary) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Critical);
+        public Task TriggerCriticalEventAsync(string source, string summary, string dedupKey = null) =>
+            Trigger(source, summary, EventAction.Trigger, Severity.Critical,dedupKey);
 
-        public Task TriggerErrorEventAsync(string source, string summary) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Error);
+        public Task TriggerErrorEventAsync(string source, string summary, string dedupKey = null) =>
+            Trigger(source, summary, EventAction.Trigger, Severity.Error, dedupKey);
 
-        public Task TriggerInfoEventAsync(string source, string summary) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Info);
+        public Task TriggerInfoEventAsync(string source, string summary, string dedupKey = null) =>
+            Trigger(source, summary, EventAction.Trigger, Severity.Info, dedupKey);
 
-        public Task TriggerWarningEventAsync(string source, string summary) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Warning);
+        public Task TriggerWarningEventAsync(string source, string summary, string dedupKey = null) =>
+            Trigger(source, summary, EventAction.Trigger, Severity.Warning, dedupKey);
     }
 }
