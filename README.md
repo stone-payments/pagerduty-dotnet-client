@@ -9,10 +9,7 @@ Enables you to add PagerDuty's advanced event and incident management functional
 
 Usage:
 ``` csharp
-var settings = new PagerDutySettings 
-{
-	RoutingKey = SERVICE_ROUTING_KEY
-};
+var settings = new PagerDutySettings { RoutingKey = SERVICE_ROUTING_KEY };
 
 var client = new PagerDutyClient(settings);
 
