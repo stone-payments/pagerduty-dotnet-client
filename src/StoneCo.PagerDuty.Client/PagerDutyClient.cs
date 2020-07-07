@@ -3,6 +3,7 @@ using StoneCo.PagerDuty.Client.Contracts;
 using StoneCo.PagerDuty.Client.Exception;
 using StoneCo.PagerDuty.Client.Extension;
 using StoneCo.PagerDuty.Client.Settings;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace StoneCo.PagerDuty.Client
             _httpClient = httpClient;
         }
 
-        public PagerDutyClient(PagerDutySettings pagerDutySettings, HttpMessageHandler httpMessageHandler = null)
+        public PagerDutyClient(PagerDutySettings pagerDutySettings, HttpMessageHandler? httpMessageHandler = null)
         {
             _httpClient = httpMessageHandler is null 
                 ? new HttpClient() 
@@ -27,20 +28,25 @@ namespace StoneCo.PagerDuty.Client
             PagerDutyDependenceExtension.ConfigureHttpClient(_httpClient, pagerDutySettings);
         }
 
-        private async Task Trigger(string source, string summary, EventAction action, Severity severity, string dedupKey)
+        public Task TriggerEventAsync(EventTriggerOptions options)
         {
-            await SendEvent(new SendEventRequest(source, action, severity, summary, dedupKey));
+            if (options is null) throw new ArgumentNullException(nameof(options));
+
+            return SendEventAsync(new SendEventRequest(
+                options.Source, EventAction.Trigger, options.Severity, options.Summary, options.DedupKey));
         }
 
-        private async Task SendEvent(SendEventRequest e)
+        private async Task SendEventAsync(SendEventRequest e)
         {
-            HttpResponseMessage response = null;
+            HttpResponseMessage? response = null;
 
             try
             {
                 using var request = new StringContent(JsonConvert.SerializeObject(e));
 
                 response = await _httpClient.PostAsync(SendEventEndpoint, request);
+
+                var content = await response.Content.ReadAsStringAsync();
 
                 response.EnsureSuccessStatusCode();
             }
@@ -52,17 +58,5 @@ namespace StoneCo.PagerDuty.Client
                         : $"Response {response.Content.ReadAsStringAsync()}.");
             }
         }
-
-        public Task TriggerCriticalEventAsync(string source, string summary, string dedupKey = null) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Critical,dedupKey);
-
-        public Task TriggerErrorEventAsync(string source, string summary, string dedupKey = null) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Error, dedupKey);
-
-        public Task TriggerInfoEventAsync(string source, string summary, string dedupKey = null) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Info, dedupKey);
-
-        public Task TriggerWarningEventAsync(string source, string summary, string dedupKey = null) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Warning, dedupKey);
     }
 }

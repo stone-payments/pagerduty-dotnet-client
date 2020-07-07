@@ -5,14 +5,14 @@ namespace StoneCo.PagerDuty.Client.Contracts
 {
     internal class SendEventRequest
     {
-        public SendEventRequest(Payload payload, EventAction eventAction, string dedupKey)
+        public SendEventRequest(Payload payload, EventAction eventAction, string? dedupKey)
         {
             Payload = payload;
             EventAction = eventAction;
             DedupKey = dedupKey;
         }
 
-        public SendEventRequest(string source, EventAction eventAction, Severity severity, string summary, string dedupKey)
+        public SendEventRequest(string source, EventAction eventAction, Severity severity, string summary, string? dedupKey)
             : this(new Payload(source, summary, severity), eventAction, dedupKey)
         { }
 
@@ -24,6 +24,6 @@ namespace StoneCo.PagerDuty.Client.Contracts
         public Payload Payload { get; set; }
 
         [JsonProperty("dedup_key")]
-        public string DedupKey { get; set; }
+        public string? DedupKey { get; set; }
     }
 }
