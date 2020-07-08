@@ -46,8 +46,6 @@ namespace StoneCo.PagerDuty.Client
 
                 response = await _httpClient.PostAsync(SendEventEndpoint, request);
 
-                var content = await response.Content.ReadAsStringAsync();
-
                 response.EnsureSuccessStatusCode();
             }
             catch (System.Exception ex)
