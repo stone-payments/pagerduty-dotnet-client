@@ -3,8 +3,8 @@ using StoneCo.PagerDuty.Client.Contracts;
 using StoneCo.PagerDuty.Client.Exception;
 using StoneCo.PagerDuty.Client.Extension;
 using StoneCo.PagerDuty.Client.Settings;
+using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace StoneCo.PagerDuty.Client
@@ -19,7 +19,7 @@ namespace StoneCo.PagerDuty.Client
             _httpClient = httpClient;
         }
 
-        public PagerDutyClient(PagerDutySettings pagerDutySettings, HttpMessageHandler httpMessageHandler = null)
+        public PagerDutyClient(PagerDutySettings pagerDutySettings, HttpMessageHandler? httpMessageHandler = null)
         {
             _httpClient = httpMessageHandler is null 
                 ? new HttpClient() 
@@ -28,14 +28,17 @@ namespace StoneCo.PagerDuty.Client
             PagerDutyDependenceExtension.ConfigureHttpClient(_httpClient, pagerDutySettings);
         }
 
-        private async Task Trigger(string source, string summary, EventAction action, Severity severity)
+        public Task TriggerEventAsync(EventTriggerOptions options)
         {
-            await SendEvent(new SendEventRequest(source, action, severity, summary));
+            if (options is null) throw new ArgumentNullException(nameof(options));
+
+            return SendEventAsync(new SendEventRequest(
+                options.Source, EventAction.Trigger, options.Severity, options.Summary, options.DedupKey));
         }
 
-        private async Task SendEvent(SendEventRequest e)
+        private async Task SendEventAsync(SendEventRequest e)
         {
-            HttpResponseMessage response = null;
+            HttpResponseMessage? response = null;
 
             try
             {
@@ -53,17 +56,5 @@ namespace StoneCo.PagerDuty.Client
                         : $"Response {response.Content.ReadAsStringAsync()}.");
             }
         }
-
-        public Task TriggerCriticalEventAsync(string source, string summary) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Critical);
-
-        public Task TriggerErrorEventAsync(string source, string summary) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Error);
-
-        public Task TriggerInfoEventAsync(string source, string summary) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Info);
-
-        public Task TriggerWarningEventAsync(string source, string summary) =>
-            Trigger(source, summary, EventAction.Trigger, Severity.Warning);
     }
 }

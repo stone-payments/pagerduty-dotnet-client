@@ -2,7 +2,7 @@
 
 namespace StoneCo.PagerDuty.Client.Contracts
 {
-    internal enum Severity
+    public enum Severity
     {
         [EnumMember(Value = "critical")] 
         Critical,

@@ -2,7 +2,7 @@
 {
     public class PagerDutySettings
     {
-        public string BaseAddress { get; set; }
-        public string RoutingKey { get; set; }
+        public string? BaseAddress { get; set; } = "https://events.pagerduty.com";
+        public string? RoutingKey { get; set; }
     }
 }
