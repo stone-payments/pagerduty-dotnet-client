@@ -21,8 +21,8 @@ namespace StoneCo.PagerDuty.Client
 
         public PagerDutyClient(PagerDutySettings pagerDutySettings, HttpMessageHandler? httpMessageHandler = null)
         {
-            _httpClient = httpMessageHandler is null 
-                ? new HttpClient() 
+            _httpClient = httpMessageHandler is null
+                ? new HttpClient()
                 : new HttpClient(httpMessageHandler);
 
             PagerDutyDependenceExtension.ConfigureHttpClient(_httpClient, pagerDutySettings);
@@ -38,22 +38,26 @@ namespace StoneCo.PagerDuty.Client
 
         private async Task SendEventAsync(SendEventRequest e)
         {
-            HttpResponseMessage? response = null;
+            string? content = null;
 
             try
             {
                 using var request = new StringContent(JsonConvert.SerializeObject(e));
 
-                response = await _httpClient.PostAsync(SendEventEndpoint, request);
+                var response = await _httpClient.PostAsync(SendEventEndpoint, request);
+
+                if (response.IsSuccessStatusCode) return;
+
+                content = await response.Content.ReadAsStringAsync();
 
                 response.EnsureSuccessStatusCode();
             }
             catch (System.Exception ex)
             {
                 throw new PagerDutyTriggerException(ex
-                    , response is null
+                    , string.IsNullOrWhiteSpace(content)
                         ? "No content."
-                        : $"Response {response.Content.ReadAsStringAsync()}.");
+                        : $"Response {content}.");
             }
         }
     }
