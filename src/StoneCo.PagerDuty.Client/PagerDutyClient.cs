@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using StoneCo.PagerDuty.Client.Contracts;
 using StoneCo.PagerDuty.Client.Exception;
-using StoneCo.PagerDuty.Client.Extension;
 using StoneCo.PagerDuty.Client.Settings;
 using System;
 using System.Net.Http;
@@ -25,7 +24,8 @@ namespace StoneCo.PagerDuty.Client
                 ? new HttpClient()
                 : new HttpClient(httpMessageHandler);
 
-            PagerDutyDependenceExtension.ConfigureHttpClient(_httpClient, pagerDutySettings);
+            _httpClient.BaseAddress = new Uri(pagerDutySettings.BaseAddress);
+            _httpClient.DefaultRequestHeaders.Add("x-routing-key", pagerDutySettings.RoutingKey);
         }
 
         public Task TriggerEventAsync(EventTriggerOptions options)

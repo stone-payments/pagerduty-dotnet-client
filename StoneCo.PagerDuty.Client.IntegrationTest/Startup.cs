@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StoneCo.PagerDuty.Client.Extension;
+using Microsoft.Extensions.Options;
+using StoneCo.PagerDuty.Client.Settings;
 using System;
 using System.Net.Http;
-using StoneCo.PagerDuty.Client.Settings;
 
 namespace StoneCo.PagerDuty.Client.IntegrationTest
 {
@@ -30,10 +30,32 @@ namespace StoneCo.PagerDuty.Client.IntegrationTest
 
             services.AddSingleton(pagerDutySettings);
 
-            services.AddPagerDuty(pds => _configurationRoot.GetSection("PagerDutySettingsTest").Bind(pds)
+            AddPagerDuty(services, pds => _configurationRoot.GetSection("PagerDutySettingsTest").Bind(pds)
                 , hch => new HttpClientHandler());
         }
 
         public void Configure(IServiceProvider services, IApplicationBuilder app){}
+
+        public static void AddPagerDuty(IServiceCollection service, Action<PagerDutySettings> pagerDutySettingsConfiguration, Func<IServiceProvider, HttpMessageHandler> configureHttpMessageHandler)
+        {
+            service.Configure(pagerDutySettingsConfiguration);
+
+            service.AddSingleton<IPagerDutyClient, PagerDutyClient>();
+            service.AddHttpClient<IPagerDutyClient, PagerDutyClient>(ConfigureClient)
+                .ConfigurePrimaryHttpMessageHandler(configureHttpMessageHandler);
+
+            static void ConfigureClient(IServiceProvider serviceProvider, HttpClient httpClient)
+            {
+                var pagerDutySettings = serviceProvider.GetRequiredService<IOptionsSnapshot<PagerDutySettings>>().Value;
+
+                ConfigureHttpClient(httpClient, pagerDutySettings);
+            }
+
+            static void ConfigureHttpClient(HttpClient httpClient, PagerDutySettings pagerDutySettings)
+            {
+                httpClient.BaseAddress = new Uri(pagerDutySettings.BaseAddress);
+                httpClient.DefaultRequestHeaders.Add("x-routing-key", pagerDutySettings.RoutingKey);
+            }
+        }
     }
 }
